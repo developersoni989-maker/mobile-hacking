@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<p id="result">Thank you for visiting</p>
+<script src="https://cdn.jsdelivr.net/npm/dsbridge@3.1.4/dist/dsbridge.min.js"></script>
+<script>
+
+function parse(res){
+  if(typeof res==="string"){ try{ res=JSON.parse(res);}catch(e){} }
+  return res && res.data && res.data.authtoken;
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  const bridge = window.dsBridge || window._dsbridge;
+  if(!bridge || !bridge.call){ return; }
+  bridge.call("getUserAuth", {}, function(resp){
+      const jwt = parse(resp);
+
+  });
+});
+</script>
+</body>
+</html>
+
+, this is my javascript code 
